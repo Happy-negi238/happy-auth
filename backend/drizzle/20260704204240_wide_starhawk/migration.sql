@@ -1,0 +1,1 @@
+ALTER TABLE "authorization_codes" ADD COLUMN "is_used" boolean DEFAULT false NOT NULL;
