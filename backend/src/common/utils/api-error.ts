@@ -25,6 +25,10 @@ class ApiError extends Error {
   static noContent(message = "No content"): ApiError {
     return new ApiError(204, message);
   }
+
+  static notFound(message = "Not found"): ApiError {
+    return new ApiError(404, message);
+  }
 }
 
 export default ApiError;

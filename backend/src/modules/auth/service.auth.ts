@@ -1,5 +1,5 @@
 import { eq, and } from "drizzle-orm";
-import jose from "node-jose"
+import jose from "node-jose";
 import {
   authorizationCodes,
   registeredApps,
@@ -98,7 +98,10 @@ async function createAuthorizationCode(data: AuthorizationType) {
   };
 }
 
-export const registerService = async (data: RegisterBody) => {
+export const registerService = async (
+  data: RegisterBody,
+  developerId: string,
+) => {
   // check first appUrl and appName in db
   // if exist throw error
   // if not create a random hash (clientId, clientSecret)
@@ -129,6 +132,7 @@ export const registerService = async (data: RegisterBody) => {
       redirectUri,
       clientId,
       clientSecret,
+      developerId
     })
     .returning();
 
@@ -190,7 +194,10 @@ export const singInService = async (data: SignInBody, clientId: string) => {
     throw ApiError.badRequest("Email-id is not exist");
   }
 
-  const comparePassword = await compareHashPassword(password, signUser.password);
+  const comparePassword = await compareHashPassword(
+    password,
+    signUser.password,
+  );
 
   if (!comparePassword) {
     throw ApiError.badRequest("Email-id and password are incorrect");
@@ -304,5 +311,5 @@ export const tokenService = async (body: TokenResponse, code: string) => {
 
 export const certService = async () => {
   const key = await jose.JWK.asKey(PUBLIC_KEY, "pem");
-  return key.toJSON()
-}
+  return key.toJSON();
+};

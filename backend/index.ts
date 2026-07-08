@@ -1,7 +1,9 @@
 import express, { type Response } from "express";
 import { createServer } from "node:http";
-import { router } from "./src/modules/auth/route.auth";
 import cors from "cors";
+
+import { router } from "./src/modules/auth/route.auth";
+import { userRoute } from "./src/modules/user-auth/route.user";
 function main() {
   const PORT = 8080;
   const app = express();
@@ -16,6 +18,7 @@ function main() {
     }),
   );
   app.use("/", router);
+  app.use("/user", userRoute)
 
   app.get("/health", (req, res: Response) => {
     res.status(200).json({ ok: true });

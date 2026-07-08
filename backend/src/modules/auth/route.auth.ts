@@ -27,6 +27,7 @@ router.post(
   controller.registerController,
 );
 
+// OATH Route
 router.post("/o/auth", validate(SignUpDto), controller.signUpController);
 router.post("/o/auth/sign-in", validate(SignInDto), controller.signInController);
 router.post("/token",  controller.tokenController);

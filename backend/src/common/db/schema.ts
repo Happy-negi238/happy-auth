@@ -1,4 +1,11 @@
-import { pgTable, uuid, varchar, timestamp, text, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  varchar,
+  timestamp,
+  text,
+  boolean,
+} from "drizzle-orm/pg-core";
 
 export const registeredApps = pgTable("registered_apps", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -7,6 +14,9 @@ export const registeredApps = pgTable("registered_apps", {
   redirectUri: text("redirect_uri").notNull(),
   clientId: text("client_id").notNull().unique(),
   clientSecret: text("client_secret").notNull(),
+  developerId: uuid("developer_id")
+    .notNull()
+    .references(() => developers.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -32,4 +42,14 @@ export const authorizationCodes = pgTable("authorization_codes", {
   expiresAt: timestamp("expires_at").notNull(),
   isUsed: boolean("is_used").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const developers = pgTable("developers", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  fullName: varchar("full_name", { length: 30 }).notNull(),
+  email: varchar("email", { length: 30 }).notNull(),
+  password: varchar("password", { length: 62 }).notNull(),
+  isActive: boolean("is_active").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

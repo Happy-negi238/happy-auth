@@ -11,11 +11,18 @@ export type RegisterBody = z.infer<typeof RegisterDto.schema>;
 export type SignUpBody = z.infer<typeof SignUpDto.schema>;
 export type SignInBody = z.infer<typeof SignInDto.schema>;
 
+// OATH Controller
 export const registerController = async (
   req: Request<{}, {}, RegisterBody>,
   res: Response,
 ) => {
-  const result = await service.registerService(req.body);
+  const developerId: string | undefined = req.cookies.developerId;
+
+  if (!developerId) {
+    return ApiError.notFound("Developer ID not found in cookies.")
+  }
+
+  const result = await service.registerService(req.body, developerId);
   return ApiResponse.ok(res, result);
 };
 
@@ -60,5 +67,5 @@ export const tokenController = async (req: Request, res: Response) => {
 
 export const certController = async (req: Request, res: Response) => {
   const result = await service.certService();
-  return res.json({result: [result]});
-}
+  return res.json({ result: [result] });
+};
