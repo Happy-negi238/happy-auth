@@ -1,0 +1,1 @@
+ALTER TABLE "developers" ADD COLUMN "refresh_token" varchar(64);

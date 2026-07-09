@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { PRIVATE_KEY } from "./cert";
+import { PRIVATE_KEY, PUBLIC_KEY } from "./cert";
 dotenv.config();
 
 type TokenType = "access" | "refresh";
@@ -10,14 +10,12 @@ type TokenPayload = {
   name: string;
   email: string;
   tokenType?: TokenType;
-  phone: string;
 };
 
 export const generateAccessToken = (
   userId: string,
   name: string,
   email: string,
-  phone: string,
 ) => {
   try {
     const payload: TokenPayload = {
@@ -25,7 +23,6 @@ export const generateAccessToken = (
       name,
       email,
       tokenType: "access",
-      phone,
     };
 
     return jwt.sign(payload, PRIVATE_KEY, {
@@ -41,14 +38,12 @@ export const generateRefreshToken = (
   userId: string,
   name: string,
   email: string,
-  phone: string,
 ) => {
   try {
     const payload: TokenPayload = {
       userId,
       name,
       email,
-      phone,
       tokenType: "refresh",
     };
 
@@ -58,5 +53,25 @@ export const generateRefreshToken = (
     });
   } catch (error) {
     throw new Error("Error to generate token");
+  }
+};
+
+export const verifyAccessToken = (token: string) => {
+  try {
+    return jwt.verify(token, PUBLIC_KEY, {
+      algorithms: ["RS256"],
+    });
+  } catch (error) {
+    throw new Error("Invalid or expired access token");
+  }
+};
+
+export const verifyRefreshToken = (token: string) => {
+  try {
+    return jwt.verify(token, PUBLIC_KEY, {
+      algorithms: ["RS256"],
+    });
+  } catch (error) {
+    throw new Error("Invalid or expired refresh token");
   }
 };

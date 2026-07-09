@@ -1,6 +1,7 @@
 import express, { type Response } from "express";
 import { createServer } from "node:http";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 import { router } from "./src/modules/auth/route.auth";
 import { userRoute } from "./src/modules/user-auth/route.user";
@@ -11,6 +12,7 @@ function main() {
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
   app.use(
     cors({
       origin: "http://localhost:5173",

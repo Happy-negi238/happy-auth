@@ -39,7 +39,6 @@ const CreateApp = () => {
       const response = await registerApp(formData);
       
       setdata(response.data as ResponseType);
-      console.log("Application registered:", response);
 
       // Optional: Clear the form
       setFormData({
@@ -62,7 +61,7 @@ const CreateApp = () => {
           </h1>
         </div>
 
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950/10 p-8 backdrop-blur">
+        <div className="rounded-xl border border-neutral-800 bg-[#0e0e0e] p-8 backdrop-blur">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-200">

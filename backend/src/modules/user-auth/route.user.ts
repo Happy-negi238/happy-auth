@@ -9,3 +9,4 @@ export const userRoute = express.Router();
 // User Route
 userRoute.post("/sign-up", validate(clientSignUpDto), controller.clientSignUp);
 userRoute.post("/sign-in", validate(clientSignInDto), controller.clientSignIn);
+userRoute.get("/me", controller.clientGetMe);

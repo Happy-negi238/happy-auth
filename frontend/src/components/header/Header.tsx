@@ -48,7 +48,7 @@ const Header = () => {
             Login
           </NavLink>
           <NavLink
-            to="/sign-un"
+            to="/sign-up"
             className={({ isActive }) =>
               `text-sm  transition py-2 px-3 rounded ease-in-out${
                 isActive

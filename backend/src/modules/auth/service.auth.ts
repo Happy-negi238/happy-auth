@@ -2,6 +2,7 @@ import { eq, and } from "drizzle-orm";
 import jose from "node-jose";
 import {
   authorizationCodes,
+  developers,
   registeredApps,
   users,
 } from "../../common/db/schema";
@@ -107,6 +108,15 @@ export const registerService = async (
   // if not create a random hash (clientId, clientSecret)
   const { appName, appUrl, redirectUri } = data;
 
+  const isDeveloperActive = await db
+    .select()
+    .from(developers)
+    .where(eq(developers.id, developerId));
+
+  if (isDeveloperActive.length === 0) {
+    return ApiError.badRequest("User is not authorized");
+  }
+
   const isExist = await db
     .select()
     .from(registeredApps)
@@ -118,7 +128,7 @@ export const registerService = async (
     );
 
   if (isExist.length > 0) {
-    throw ApiError.conflict("App already registered");
+    return ApiError.conflict("App already registered");
   }
 
   const clientId = crypto.randomUUID();
@@ -132,12 +142,12 @@ export const registerService = async (
       redirectUri,
       clientId,
       clientSecret,
-      developerId
+      developerId,
     })
     .returning();
 
   if (insertedData.length === 0) {
-    throw ApiError.InternalServerError("Failed to insert data");
+    return ApiError.InternalServerError("Failed to insert data");
   }
 
   return {
@@ -282,13 +292,11 @@ export const tokenService = async (body: TokenResponse, code: string) => {
     user.id,
     user.name,
     user.email,
-    user.phone ?? "",
   );
   const refreshToken = generateRefreshToken(
     user.id,
     user.name,
     user.email,
-    user.phone ?? "",
   );
 
   const hashRefreshToken = await generateHashPassword(refreshToken);

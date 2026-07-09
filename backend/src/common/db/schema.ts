@@ -50,6 +50,7 @@ export const developers = pgTable("developers", {
   email: varchar("email", { length: 30 }).notNull(),
   password: varchar("password", { length: 62 }).notNull(),
   isActive: boolean("is_active").default(false),
+  refreshToken: varchar("refresh_token", { length: 64 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

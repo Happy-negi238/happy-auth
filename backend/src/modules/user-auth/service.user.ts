@@ -3,6 +3,13 @@ import bcrypt from "bcrypt";
 import { db } from "../../index";
 import { developers } from "../../common/db/schema";
 import ApiError from "../../common/utils/api-error";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+} from "../../common/utils/jwt-token";
+import type { Request } from "express";
 
 const SALT_ROUNDS = 10;
 
@@ -14,6 +21,13 @@ type ClientSignUpServiceType = {
 type ClientSignInServiceType = {
   email: string;
   password: string;
+};
+
+type TokenPayload = {
+  userId: string;
+  name: string;
+  email: string;
+  tokenType: "access" | "refresh";
 };
 
 async function generateHashPassword(password: string): Promise<string> {
@@ -87,10 +101,23 @@ export const clientSignInService = async ({
     return ApiError.unauthorized("Email and password are incorrect");
   }
 
+  const accessToken = generateAccessToken(
+    existingDeveloper[0].id,
+    existingDeveloper[0].fullName,
+    existingDeveloper[0].email,
+  );
+
+  const refreshToken = generateRefreshToken(
+    existingDeveloper[0].id,
+    existingDeveloper[0].fullName,
+    existingDeveloper[0].email,
+  );
+
+  const hashRefreshToken = await generateHashPassword(refreshToken);
   // set isActive developer
   const [developer] = await db
     .update(developers)
-    .set({ isActive: true })
+    .set({ isActive: true, refreshToken: hashRefreshToken })
     .where(eq(developers.email, email))
     .returning();
 
@@ -98,5 +125,87 @@ export const clientSignInService = async ({
     return ApiError.InternalServerError("Failed to sending data");
   }
 
-  return { success: true };
+  return { success: true, accessToken, refreshToken };
+};
+
+export const getMeService = async (req: Request) => {
+  const accessToken: string | undefined = req.cookies.accessToken;
+  const refreshToken: string | undefined = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return ApiError.unauthorized("Unauthorized request");
+  }
+
+  // -----------------------------
+  // Try Access Token First
+  // -----------------------------
+  if (accessToken) {
+    try {
+      const payload = verifyAccessToken(accessToken) as TokenPayload;
+
+      const [developer] = await db
+        .select()
+        .from(developers)
+        .where(eq(developers.id, payload.userId));
+
+      if (!developer) {
+        return ApiError.unauthorized("Developer not found");
+      }
+
+      return {
+        success: true,
+        newAccessToken: null,
+      };
+    } catch (error) {
+      return ApiError.InternalServerError("Error to verify");
+    }
+  }
+
+  // -----------------------------
+  // Access Token Expired
+  // -----------------------------
+  try {
+    const payload = verifyRefreshToken(refreshToken) as TokenPayload;
+    const [developer] = await db
+      .select()
+      .from(developers)
+      .where(eq(developers.id, payload.userId));
+
+    if (!developer) {
+      return ApiError.unauthorized("Developer not found");
+    }
+
+    if (!developer.refreshToken) {
+      return ApiError.unauthorized("Token does not exist");
+    }
+
+    const matched = await compareHashPassword(
+      refreshToken,
+      developer.refreshToken,
+    );
+
+    if (!matched) {
+      return ApiError.unauthorized("Failed to verify user");
+    }
+
+    const newAccessToken = generateAccessToken(
+      developer.id,
+      developer.fullName,
+      developer.email,
+    );
+
+    const newRefreshToken = generateRefreshToken(
+      developer.id,
+      developer.fullName,
+      developer.email,
+    );
+
+    return {
+      success: true,
+      newAccessToken,
+      newRefreshToken,
+    };
+  } catch (error) {
+    return ApiError.InternalServerError("Failed to verify token");
+  }
 };
