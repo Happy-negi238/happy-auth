@@ -1,10 +1,11 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { authenticate } from "./api/axios/apps";
+import { useAuth } from "./context/AuthContext";
 
 const ProtectedRoute = () => {
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
 
   useEffect(() => {
     const checkAuth = async () => {
