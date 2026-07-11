@@ -128,64 +128,19 @@ export const clientSignInService = async ({
   return { success: true, accessToken, refreshToken };
 };
 
-export const getMeService = async (req: Request) => {
-  const accessToken: string | undefined = req.cookies.accessToken;
-  const refreshToken: string | undefined = req.cookies.refreshToken;
-
-  if (!refreshToken) {
-    return ApiError.unauthorized("Unauthorized request");
-  }
-
-  // -----------------------------
-  // Try Access Token First
-  // -----------------------------
-  if (accessToken) {
-    try {
-      const payload = verifyAccessToken(accessToken) as TokenPayload;
-
-      const [developer] = await db
-        .select()
-        .from(developers)
-        .where(eq(developers.id, payload.userId));
-
-      if (!developer) {
-        return ApiError.unauthorized("Developer not found");
-      }
-
-      return {
-        success: true,
-        newAccessToken: null,
-      };
-    } catch (error) {
-      return ApiError.InternalServerError("Error to verify");
-    }
-  }
-
-  // -----------------------------
-  // Access Token Expired
-  // -----------------------------
+export const getMeService = async (userId: string) => {
   try {
-    const payload = verifyRefreshToken(refreshToken) as TokenPayload;
+    if (!userId) {
+      return ApiError.badRequest("Bad request");
+    }
+    
     const [developer] = await db
       .select()
       .from(developers)
-      .where(eq(developers.id, payload.userId));
+      .where(eq(developers.id, userId));
 
     if (!developer) {
       return ApiError.unauthorized("Developer not found");
-    }
-
-    if (!developer.refreshToken) {
-      return ApiError.unauthorized("Token does not exist");
-    }
-
-    const matched = await compareHashPassword(
-      refreshToken,
-      developer.refreshToken,
-    );
-
-    if (!matched) {
-      return ApiError.unauthorized("Failed to verify user");
     }
 
     const newAccessToken = generateAccessToken(
@@ -206,6 +161,24 @@ export const getMeService = async (req: Request) => {
       newRefreshToken,
     };
   } catch (error) {
-    return ApiError.InternalServerError("Failed to verify token");
+    return ApiError.InternalServerError("Error to verify");
   }
+};
+
+export const logoutService = async (userId: string) => {
+  if (!userId) {
+    return ApiError.badRequest("Bad request");
+  }
+
+  const [developer] = await db
+    .update(developers)
+    .set({ refreshToken: null, isActive: false })
+    .where(eq(developers.id, userId))
+    .returning({ id: developers.id });
+
+  if (!developer) {
+    return ApiError.notFound("Developer not found");
+  }
+
+  return { success: true };
 };

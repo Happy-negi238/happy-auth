@@ -1,5 +1,6 @@
 import { developerSignUp } from "@/api/axios/apps";
 import React, { useState } from "react";
+import {  useNavigate } from "react-router-dom";
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -7,6 +8,7 @@ export default function SignUp() {
     email: "",
     password: "",
   });
+  const navigation = useNavigate();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -24,11 +26,13 @@ export default function SignUp() {
 
     try {
       const response = await developerSignUp(formData);
+      const { data } = await response;
       setMessage({
         type: "success",
-        text: response?.message || "Account created successfully.",
+        text: data?.message ?? "Account created successfully.",
       });
       setFormData({ fullName: "", email: "", password: "" });
+      navigation("/sign-in");
     } catch (error: unknown) {
       const apiMessage =
         error && typeof error === "object" && "response" in error

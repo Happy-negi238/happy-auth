@@ -1,8 +1,24 @@
+import { unAuthenticate } from "@/api/axios/apps";
 import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 const Header = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      const response = await unAuthenticate();
+      const { data } = response;
+      setIsAuthenticated(!data.data);
+    } catch (error) {
+      console.error("User logout");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-neutral-200/10 bg-[(--background)]/80 backdrop-blur">
@@ -39,7 +55,15 @@ const Header = () => {
             Create-app
           </NavLink>
           {isAuthenticated ? (
-            <button>Logout</button>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleLogout}
+              className="text-sm cursor-pointer text-white disabled:cursor-not-allowed disabled:opacity-70 
+              hover:bg-neutral-300/10 py-2 px-3 rounded ease-in-out"
+            >
+              {loading ? "Logging out.." : "Logout"}
+            </button>
           ) : (
             <>
               <NavLink

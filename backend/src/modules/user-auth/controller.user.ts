@@ -55,7 +55,8 @@ export const clientSignIn = async (req: Request, res: Response) => {
 
 export const clientGetMe = async (req: Request, res: Response) => {
   try {
-    const result = await service.getMeService(req);
+    const { userId, email } = req.user;
+    const result = await service.getMeService(userId);
 
     if (result instanceof ApiError) {
       return res.json(result);
@@ -79,5 +80,28 @@ export const clientGetMe = async (req: Request, res: Response) => {
     return ApiResponse.ok(res, result.success);
   } catch (error) {
     return ApiError.InternalServerError("Getting error to authorize the user");
+  }
+};
+
+export const clientLogout = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return ApiResponse.ok(res, null, "Logout successfully");
+    }
+
+    const result = await service.logoutService(userId);
+
+    if (result instanceof ApiError) {
+      return res.status(result.statusCode).json({
+        message: result.message,
+        data: null,
+      });
+    }
+
+    return ApiResponse.ok(res, result.success, "Logout successfully");
+  } catch (error) {
+    return ApiError.InternalServerError("Failed to logout user");
   }
 };

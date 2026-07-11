@@ -1,7 +1,11 @@
 import { developerSignIn } from "@/api/axios/apps";
+import { useAuth } from "@/context/AuthContext";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function SignIn() {
+  const { setIsAuthenticated } = useAuth();
+  const navigation = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -25,6 +29,8 @@ export default function SignIn() {
         text: response?.message || "Signed in successfully.",
       });
       setFormData({ email: "", password: "" });
+      setIsAuthenticated(true);
+      navigation("/");
     } catch (error: unknown) {
       const apiMessage =
         error && typeof error === "object" && "response" in error
