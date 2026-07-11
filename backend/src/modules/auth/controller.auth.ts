@@ -32,12 +32,12 @@ export const signUpController = async (
 ) => {
   const { client_id } = req.query as { client_id: string };
 
-  const { email, name, phone } = await service.signUpService(
+  const { email, fullName, phone } = await service.signUpService(
     req.body,
     client_id,
   );
 
-  return ApiResponse.ok(res, { email, name, phone });
+  return ApiResponse.ok(res, { email, fullName, phone });
 };
 
 export const signInController = async (

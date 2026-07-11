@@ -159,7 +159,7 @@ export const registerService = async (
 export const signUpService = async (data: SignUpBody, clientId: string) => {
   await verifyClientId(clientId);
 
-  const { email, name, password, phone } = data;
+  const { email, fullName, password, phone } = data;
 
   const [isExist] = await db.select().from(users).where(eq(users.email, email));
 
@@ -172,7 +172,7 @@ export const signUpService = async (data: SignUpBody, clientId: string) => {
   const isDataInserted = await db
     .insert(users)
     .values({
-      name,
+      name: fullName,
       email,
       phone,
       password: hashPassword,
@@ -184,7 +184,7 @@ export const signUpService = async (data: SignUpBody, clientId: string) => {
   }
 
   return {
-    name,
+    fullName,
     email,
     phone,
   };

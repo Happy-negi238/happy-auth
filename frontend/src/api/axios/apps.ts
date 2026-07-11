@@ -17,6 +17,13 @@ export type DeveloperSignIn = {
   password: string;
 };
 
+export type OauthSignUp = {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+};
+
 export const registerApp = async (payload: RegisterAppPayload) => {
   const { data } = await api.post("/register-app", payload);
   return data;
@@ -43,4 +50,10 @@ export const unAuthenticate = async () => {
   const response = await api.get("/user/logout");
   const { data, status } = response;
   return { data, status };
+};
+
+export const oauthSignUp = async (payload: OauthSignUp) => {
+  const response = await api.post("/o/auth", payload);
+  const { data } = response;
+  return { data };
 };
