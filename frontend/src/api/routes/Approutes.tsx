@@ -14,21 +14,28 @@ import OauthSignUpPage from "@/oauth/oauth-signup/Oauth-signup";
 import OauthSignInPage from "@/oauth/oauth-singin/Oauth-signin";
 import AuthLayout from "@/oauth/AuthLayout";
 import NotFound from "@/NotFound";
+import PublicRoute from "@/PublicRoute";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route index path="" element={<Home />} />
+      
       <Route element={<ProtectedRoute />}>
         <Route path="create-app" element={<CreateApp />} />
       </Route>
-      <Route path="sign-up" element={<SignUp />} />
-      <Route path="sign-in" element={<SignIn />} />
+
+      <Route element={<PublicRoute />}>
+        <Route path="sign-up" element={<SignUp />} />
+        <Route path="sign-in" element={<SignIn />} />
+      </Route>
+
       <Route path="o/auth" element={<AuthLayout />}>
         <Route index element={<OauthSignUpPage />} />
         <Route path="sign-in" element={<OauthSignInPage />} />
       </Route>
-      <Route path="/not-found" element={<NotFound/>}/>
+
+      <Route path="/not-found" element={<NotFound />} />
     </Route>,
   ),
 );

@@ -10,5 +10,5 @@ export const userRoute = express.Router();
 // User Route
 userRoute.post("/sign-up", validate(clientSignUpDto), controller.clientSignUp);
 userRoute.post("/sign-in", validate(clientSignInDto), controller.clientSignIn);
-userRoute.get("/me", authenticate, controller.clientGetMe);
+userRoute.get("/authenticate", authenticate, controller.clientAuthenticate);
 userRoute.get("/logout", authenticate ,controller.clientLogout);

@@ -47,34 +47,25 @@ export const clientSignIn = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    res.cookie("developerId", result.developerId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict"
+    })
+
     return ApiResponse.ok(res, result.success, "User login Successfully");
   } catch (error) {
     return ApiError.InternalServerError("Failed to sending data..");
   }
 };
 
-export const clientGetMe = async (req: Request, res: Response) => {
+export const clientAuthenticate = async (req: Request, res: Response) => {
   try {
     const { userId, email } = req.user;
-    const result = await service.getMeService(userId);
+    const result = await service.authenticateService(userId);
 
     if (result instanceof ApiError) {
       return res.json(result);
-    }
-    if (result.newAccessToken) {
-      res.cookie("accessToken", result.newAccessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 10 * 60 * 1000,
-      });
-
-      res.cookie("refreshToken", result.newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
     }
 
     return ApiResponse.ok(res, result.success);

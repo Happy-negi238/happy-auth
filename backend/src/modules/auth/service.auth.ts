@@ -156,6 +156,20 @@ export const registerService = async (
   };
 };
 
+export const signUpAuthService = async (clientId: string) => {
+  const [data] = await db
+    .select()
+    .from(registeredApps)
+    .where(eq(registeredApps.clientId, clientId));
+
+  if (!data) {
+    return ApiError.unauthorized("Unauthorized client");
+  }
+
+  const { appName, id } = data;
+  return { appName, id };
+};
+
 export const signUpService = async (data: SignUpBody, clientId: string) => {
   await verifyClientId(clientId);
 
@@ -288,16 +302,8 @@ export const tokenService = async (body: TokenResponse, code: string) => {
     throw ApiError.badRequest("User not found");
   }
 
-  const accessToken = generateAccessToken(
-    user.id,
-    user.name,
-    user.email,
-  );
-  const refreshToken = generateRefreshToken(
-    user.id,
-    user.name,
-    user.email,
-  );
+  const accessToken = generateAccessToken(user.id, user.name, user.email);
+  const refreshToken = generateRefreshToken(user.id, user.name, user.email);
 
   const hashRefreshToken = await generateHashPassword(refreshToken);
 

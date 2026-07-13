@@ -1,11 +1,11 @@
-import jwt from "jsonwebtoken";
+import jwt, {type JwtPayload} from "jsonwebtoken";
 import dotenv from "dotenv";
 import { PRIVATE_KEY, PUBLIC_KEY } from "./cert";
 dotenv.config();
 
 type TokenType = "access" | "refresh";
 
-type TokenPayload = {
+export interface TokenPayload extends JwtPayload  {
   userId: string;
   name: string;
   email: string;

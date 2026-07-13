@@ -24,9 +24,14 @@ export type OauthSignUp = {
   password: string;
 };
 
+export type OauthSignIn = {
+  email: string;
+  password: string;
+};
+
 export const registerApp = async (payload: RegisterAppPayload) => {
   const { data } = await api.post("/register-app", payload);
-  return data;
+  return { data };
 };
 
 export const developerSignUp = async (payload: DeveloperSignUp) => {
@@ -42,8 +47,8 @@ export const developerSignIn = async (payload: DeveloperSignIn) => {
 };
 
 export const authenticate = async () => {
-  const { data } = await api.get("/user/me");
-  return data;
+  const { data } = await api.get("/user/authenticate");
+  return { data };
 };
 
 export const unAuthenticate = async () => {
@@ -54,6 +59,20 @@ export const unAuthenticate = async () => {
 
 export const oauthSignUp = async (payload: OauthSignUp) => {
   const response = await api.post("/o/auth", payload);
+  const { data } = response;
+  return { data };
+};
+
+export const oauthSignUpClientId = async (clientId: string) => {
+  const response = await api.get("/o/auth", {
+    params: clientId,
+  });
+  const { data } = response;
+  return { data };
+};
+
+export const oauthSignIn = async (payload: OauthSignIn) => {
+  const response = await api.post("/o/auth/sign-in", payload);
   const { data } = response;
   return { data };
 };

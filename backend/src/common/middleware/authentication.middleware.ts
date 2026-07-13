@@ -1,9 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
-import {
-  type JwtPayload,
-} from "jsonwebtoken";
 import ApiError from "../utils/api-error";
-import { verifyAccessToken, verifyRefreshToken } from "../utils/jwt-token";
+import {
+  verifyAccessToken,
+  verifyRefreshToken,
+  type TokenPayload,
+} from "../utils/jwt-token";
+import { db } from "../..";
+import { developers } from "../db/schema";
+import { eq } from "drizzle-orm";
+import { compareHash } from "../../modules/user-auth/service.user";
 
 declare global {
   namespace Express {
@@ -16,15 +21,19 @@ declare global {
   }
 }
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const accessToken = req.cookies.accessToken;
   const refreshToken = req.cookies.refreshToken;
 
   // 1. Try Access Token
   if (accessToken) {
     try {
-      const payload = verifyAccessToken(accessToken) as JwtPayload;
-        
+      const payload = verifyAccessToken(accessToken) as TokenPayload;
+
       req.user = {
         userId: payload.userId,
         email: payload.email,
@@ -32,16 +41,30 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
 
       return next();
     } catch (error) {
-      
-        ApiError.unauthorized("Invalid access token");
+      return ApiError.unauthorized("Invalid access token");
     }
   }
 
   // 2. Try Refresh Token
   if (refreshToken) {
     try {
-      const payload = verifyRefreshToken(refreshToken) as JwtPayload;
+      const payload = verifyRefreshToken(refreshToken) as TokenPayload;
 
+      const [developerData] = await db
+        .select()
+        .from(developers)
+        .where(eq(developers.id, payload.userId));
+
+      if(!developerData || !developerData.refreshToken){
+        return ApiError.unauthorized("Unauthorized access denied");
+      }
+
+      const isHashMatched = await compareHash(refreshToken, developerData.refreshToken);
+
+      if(!isHashMatched){
+        return ApiError.badRequest("Invalid grant")
+      }
+      
       req.user = {
         userId: payload.userId,
         email: payload.email,

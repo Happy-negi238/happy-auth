@@ -1,6 +1,49 @@
+import { useState } from "react";
 import AuthNavigation from "../component/AuthNavigation";
+import { oauthSignIn } from "@/api/axios/apps";
+import { OauthSignInZod, type OauthSignInTypes } from "./types";
+import { z } from "zod";
 
 const OauthSignInPage = () => {
+  const [formData, setFormData] = useState<OauthSignInTypes>({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.SubmitEvent) => {
+    e.preventDefault();
+    const result = OauthSignInZod.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors = z.flattenError(result.error).fieldErrors;
+      setErrors({
+        email: fieldErrors?.email?.[0] || "",
+        password: fieldErrors?.password?.[0] || "",
+      });
+      return;
+    }
+
+    setErrors({
+      email: "",
+      password: "",
+    });
+
+    try {
+      const response = await oauthSignIn(result.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
       <div className="w-full max-w-md rounded-xl border border-neutral-800 bg-[#0e0e0e] p-8 shadow-xl">
@@ -13,7 +56,7 @@ const OauthSignInPage = () => {
 
         <AuthNavigation />
 
-        <form className="space-y-5">
+        <form className="space-y-5" onSubmit={handleSubmit}>
           {/* Email */}
           <div className="space-y-2">
             <label
@@ -27,11 +70,17 @@ const OauthSignInPage = () => {
               id="email"
               type="email"
               required
+              name="email"
               placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
               className="w-full rounded-lg border border-neutral-700 text-sm bg-[#151515] px-3 py-2 text-white
             placeholder:text-neutral-500 placeholder:text-sm outline-none transition focus:border-neutral-600"
             />
           </div>
+          {errors.email && (
+            <p className="text-xs text-red-500">{errors.email}</p>
+          )}
 
           {/* Password */}
           <div className="space-y-2">
@@ -46,11 +95,17 @@ const OauthSignInPage = () => {
               id="password"
               type="password"
               required
+              name="password"
               placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
               className="w-full rounded-lg border border-neutral-700 text-sm bg-[#151515] px-3 py-2 text-white 
               placeholder:text-neutral-500 placeholder:text-sm  outline-none transition focus:border-neutral-600"
             />
           </div>
+          {errors.password && (
+            <p className="text-xs text-red-500">{errors.password}</p>
+          )}
 
           <button
             type="submit"

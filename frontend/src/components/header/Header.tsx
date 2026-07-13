@@ -24,7 +24,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 border-b border-neutral-200/10 bg-[(--background)]/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-275 items-center justify-between">
         <Link to="/" className="text-xl font-bold">
-          OIDC
+          Happy
         </Link>
 
         <nav className="flex items-center gap-2">

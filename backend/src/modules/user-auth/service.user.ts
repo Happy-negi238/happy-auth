@@ -30,11 +30,11 @@ type TokenPayload = {
   tokenType: "access" | "refresh";
 };
 
-async function generateHashPassword(password: string): Promise<string> {
+export async function generateHash(password: string): Promise<string> {
   return await bcrypt.hash(password, SALT_ROUNDS);
 }
 
-async function compareHashPassword(
+export async function compareHash(
   password: string,
   hashPassword: string,
 ): Promise<boolean> {
@@ -57,7 +57,7 @@ export const clientSignUpService = async ({
   }
 
   // Hash password
-  const hashedPassword = await generateHashPassword(password);
+  const hashedPassword = await generateHash(password);
 
   // Insert developer
   const [developer] = await db
@@ -92,7 +92,7 @@ export const clientSignInService = async ({
   }
 
   // compare hash password
-  const hashedPassword = await compareHashPassword(
+  const hashedPassword = await compareHash(
     password,
     existingDeveloper[0].password,
   );
@@ -113,7 +113,7 @@ export const clientSignInService = async ({
     existingDeveloper[0].email,
   );
 
-  const hashRefreshToken = await generateHashPassword(refreshToken);
+  const hashRefreshToken = await generateHash(refreshToken);
   // set isActive developer
   const [developer] = await db
     .update(developers)
@@ -125,40 +125,17 @@ export const clientSignInService = async ({
     return ApiError.InternalServerError("Failed to sending data");
   }
 
-  return { success: true, accessToken, refreshToken };
+  return { success: true, accessToken, refreshToken, developerId: existingDeveloper[0].id };
 };
 
-export const getMeService = async (userId: string) => {
+export const authenticateService = async (userId: string) => {
   try {
     if (!userId) {
       return ApiError.badRequest("Bad request");
     }
-    
-    const [developer] = await db
-      .select()
-      .from(developers)
-      .where(eq(developers.id, userId));
-
-    if (!developer) {
-      return ApiError.unauthorized("Developer not found");
-    }
-
-    const newAccessToken = generateAccessToken(
-      developer.id,
-      developer.fullName,
-      developer.email,
-    );
-
-    const newRefreshToken = generateRefreshToken(
-      developer.id,
-      developer.fullName,
-      developer.email,
-    );
 
     return {
       success: true,
-      newAccessToken,
-      newRefreshToken,
     };
   } catch (error) {
     return ApiError.InternalServerError("Error to verify");

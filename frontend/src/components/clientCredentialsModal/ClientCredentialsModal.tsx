@@ -1,11 +1,11 @@
 import { Download, X } from "lucide-react";
 
-type ClientCredentialsModalProps =  {
+type ClientCredentialsModalProps = {
   open: boolean;
   onClose: () => void;
   clientId: string;
   clientSecret: string;
-}
+};
 
 const ClientCredentialsModal = ({
   open,
@@ -15,14 +15,36 @@ const ClientCredentialsModal = ({
 }: ClientCredentialsModalProps) => {
   if (!open) return null;
 
+  const handleDownload = () => {
+    const content = `
+    Client ID:
+    ${clientId}
+
+    Client Secret:
+    ${clientSecret}`;
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "oidc-credentials.txt";
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
       <div className="relative w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950 p-8">
         <button
           onClick={onClose}
-          className="absolute right-5 top-5 text-zinc-400 hover:text-white"
+          className="absolute right-5 top-5 text-zinc-400 hover:text-zinc-200"
         >
-          <X size={22} className="bg-white"/>
+          <X size={22} className="" />
         </button>
 
         <h2 className="mb-2 text-2xl font-semibold text-white">
@@ -61,10 +83,12 @@ const ClientCredentialsModal = ({
         </div>
 
         <button
-          onClick={onClose}
-          className="mt-8 w-full rounded-xl bg-white py-3 font-semibold text-black hover:bg-zinc-200"
+          onClick={handleDownload}
+          className="mt-8 w-full rounded-md flex items-center justify-center gap-1.5 
+          bg-white py-2 font-semibold text-black text-md hover:bg-zinc-200"
         >
-          <Download/>Download
+          <Download size={18} />
+          Download
         </button>
       </div>
     </div>

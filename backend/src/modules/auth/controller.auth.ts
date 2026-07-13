@@ -19,11 +19,43 @@ export const registerController = async (
   const developerId: string | undefined = req.cookies.developerId;
 
   if (!developerId) {
-    return ApiError.notFound("Developer ID not found in cookies.")
+    return ApiError.notFound("Developer ID not found in cookies.");
   }
 
-  const result = await service.registerService(req.body, developerId);
-  return ApiResponse.ok(res, result);
+  try{
+    const result = await service.registerService(req.body, developerId);
+
+    if(result instanceof ApiError){
+      console.log(result);
+      res.json(404).json({message: result.message})
+    }
+    return ApiResponse.ok(res, result);
+
+  
+  }catch(error){
+    console.log(error)
+  }
+};
+
+export const signUpAuthController = async (req: Request, res: Response) => {
+  const { client_id } = req.params as { client_id: string };
+
+  if (!client_id) {
+    return ApiError.unauthorized("Unauthorized request");
+  }
+
+  try {
+    const result = await service.signUpAuthService(client_id);
+
+    if (result instanceof ApiError) {
+      return ApiError.unauthorized("Unauthorized client");
+    }
+
+    const { appName, id } = result;
+    return { appName, id };
+  } catch (error) {
+    throw ApiError.InternalServerError("Failed to get data");
+  }
 };
 
 export const signUpController = async (
