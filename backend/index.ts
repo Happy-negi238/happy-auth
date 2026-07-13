@@ -2,6 +2,8 @@ import express, { type Response } from "express";
 import { createServer } from "node:http";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+dotenv.config();
 
 import { router } from "./src/modules/auth/route.auth";
 import { userRoute } from "./src/modules/user-auth/route.user";
@@ -15,7 +17,7 @@ function main() {
   app.use(cookieParser());
   app.use(
     cors({
-      origin: "http://localhost:5173",
+      origin: process.env.FRONTEND_URL || "http://localhost:5173",
       credentials: true,
     }),
   );
