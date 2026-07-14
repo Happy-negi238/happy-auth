@@ -29,9 +29,11 @@ export const authenticate = async (
   const accessToken = req.cookies.accessToken;
   const refreshToken = req.cookies.refreshToken;
 
+  console.log("in middleware");
   // 1. Try Access Token
   if (accessToken) {
     try {
+      console.log("access token found");
       const payload = verifyAccessToken(accessToken) as TokenPayload;
 
       req.user = {
@@ -41,13 +43,14 @@ export const authenticate = async (
 
       return next();
     } catch (error) {
-      return ApiError.unauthorized("Invalid access token");
+      throw ApiError.unauthorized("Invalid access token");
     }
   }
 
   // 2. Try Refresh Token
   if (refreshToken) {
     try {
+      console.log("refresh token found");
       const payload = verifyRefreshToken(refreshToken) as TokenPayload;
 
       const [developerData] = await db
@@ -55,16 +58,19 @@ export const authenticate = async (
         .from(developers)
         .where(eq(developers.id, payload.userId));
 
-      if(!developerData || !developerData.refreshToken){
-        return ApiError.unauthorized("Unauthorized access denied");
+      if (!developerData || !developerData.refreshToken) {
+        throw ApiError.unauthorized("Unauthorized access denied");
       }
 
-      const isHashMatched = await compareHash(refreshToken, developerData.refreshToken);
+      const isHashMatched = await compareHash(
+        refreshToken,
+        developerData.refreshToken,
+      );
 
-      if(!isHashMatched){
-        return ApiError.badRequest("Invalid grant")
+      if (!isHashMatched) {
+        throw ApiError.badRequest("Invalid grant");
       }
-      
+
       req.user = {
         userId: payload.userId,
         email: payload.email,
@@ -72,9 +78,9 @@ export const authenticate = async (
 
       return next();
     } catch {
-      ApiError.unauthorized("Invalid or expired refresh token");
+      throw ApiError.unauthorized("Invalid or expired refresh token");
     }
   }
 
-  ApiError.unauthorized("Authentication required");
+  throw ApiError.unauthorized("Authentication required");
 };

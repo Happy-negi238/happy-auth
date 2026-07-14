@@ -6,10 +6,7 @@ import ApiError from "../../common/utils/api-error";
 import {
   generateAccessToken,
   generateRefreshToken,
-  verifyAccessToken,
-  verifyRefreshToken,
 } from "../../common/utils/jwt-token";
-import type { Request } from "express";
 
 const SALT_ROUNDS = 10;
 
@@ -21,13 +18,6 @@ type ClientSignUpServiceType = {
 type ClientSignInServiceType = {
   email: string;
   password: string;
-};
-
-type TokenPayload = {
-  userId: string;
-  name: string;
-  email: string;
-  tokenType: "access" | "refresh";
 };
 
 export async function generateHash(password: string): Promise<string> {
@@ -53,7 +43,7 @@ export const clientSignUpService = async ({
     .where(eq(developers.email, email));
 
   if (existingDeveloper.length > 0) {
-    return ApiError.conflict("User with this email already exist");
+    throw ApiError.conflict("User with this email already exist");
   }
 
   // Hash password
@@ -70,7 +60,7 @@ export const clientSignUpService = async ({
     .returning();
 
   if (!developer) {
-    return ApiError.InternalServerError("Failed to sending data");
+    throw ApiError.InternalServerError("Failed to sending data");
   }
 
   const { id, email: userEmail } = developer;
@@ -88,7 +78,7 @@ export const clientSignInService = async ({
     .where(eq(developers.email, email));
 
   if (existingDeveloper.length === 0 || !existingDeveloper[0]?.password) {
-    return ApiError.unauthorized("User with this email does not exist");
+    throw ApiError.unauthorized("User with this email does not exist");
   }
 
   // compare hash password
@@ -98,7 +88,7 @@ export const clientSignInService = async ({
   );
 
   if (!hashedPassword) {
-    return ApiError.unauthorized("Email and password are incorrect");
+    throw ApiError.unauthorized("Email and password are incorrect");
   }
 
   const accessToken = generateAccessToken(
@@ -122,7 +112,7 @@ export const clientSignInService = async ({
     .returning();
 
   if (!developer) {
-    return ApiError.InternalServerError("Failed to sending data");
+    throw ApiError.InternalServerError("Failed to sending data");
   }
 
   return { success: true, accessToken, refreshToken, developerId: existingDeveloper[0].id };
@@ -131,20 +121,20 @@ export const clientSignInService = async ({
 export const authenticateService = async (userId: string) => {
   try {
     if (!userId) {
-      return ApiError.badRequest("Bad request");
+      throw ApiError.badRequest("Bad request");
     }
 
     return {
       success: true,
     };
   } catch (error) {
-    return ApiError.InternalServerError("Error to verify");
+    throw ApiError.InternalServerError("Error to verify");
   }
 };
 
 export const logoutService = async (userId: string) => {
   if (!userId) {
-    return ApiError.badRequest("Bad request");
+    throw ApiError.badRequest("Bad request");
   }
 
   const [developer] = await db
@@ -154,7 +144,7 @@ export const logoutService = async (userId: string) => {
     .returning({ id: developers.id });
 
   if (!developer) {
-    return ApiError.notFound("Developer not found");
+    throw ApiError.notFound("Developer not found");
   }
 
   return { success: true };

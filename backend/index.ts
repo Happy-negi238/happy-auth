@@ -7,6 +7,8 @@ dotenv.config();
 
 import { router } from "./src/modules/auth/route.auth";
 import { userRoute } from "./src/modules/user-auth/route.user";
+import { errorHandler } from "./src/common/utils/error-handler";
+
 function main() {
   const PORT = 8080;
   const app = express();
@@ -17,7 +19,7 @@ function main() {
   app.use(cookieParser());
   app.use(
     cors({
-      origin: process.env.FRONTEND_URL || "http://localhost:5173",
+      origin:  "http://localhost:5173",
       credentials: true,
     }),
   );
@@ -27,6 +29,8 @@ function main() {
   app.get("/health", (req, res: Response) => {
     res.status(200).json({ ok: true });
   });
+
+  app.use(errorHandler);
 
   server.listen(PORT, () => {
     console.log(`Server is running on: http://localhost:${PORT}`);

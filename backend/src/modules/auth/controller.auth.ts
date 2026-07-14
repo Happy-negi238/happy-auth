@@ -19,43 +19,25 @@ export const registerController = async (
   const developerId: string | undefined = req.cookies.developerId;
 
   if (!developerId) {
-    return ApiError.notFound("Developer ID not found in cookies.");
+    throw ApiError.notFound("Developer ID not found in cookies.");
   }
 
-  try{
-    const result = await service.registerService(req.body, developerId);
+  const result = await service.registerService(req.body, developerId);
 
-    if(result instanceof ApiError){
-      console.log(result);
-      res.json(404).json({message: result.message})
-    }
-    return ApiResponse.ok(res, result);
-
-  
-  }catch(error){
-    console.log(error)
-  }
+  return ApiResponse.ok(res, result);
 };
 
 export const signUpAuthController = async (req: Request, res: Response) => {
   const { client_id } = req.params as { client_id: string };
 
   if (!client_id) {
-    return ApiError.unauthorized("Unauthorized request");
+    throw ApiError.unauthorized("Unauthorized request");
   }
 
-  try {
-    const result = await service.signUpAuthService(client_id);
+  const result = await service.signUpAuthService(client_id);
 
-    if (result instanceof ApiError) {
-      return ApiError.unauthorized("Unauthorized client");
-    }
-
-    const { appName, id } = result;
-    return { appName, id };
-  } catch (error) {
-    throw ApiError.InternalServerError("Failed to get data");
-  }
+  const { appName, id } = result;
+  return { appName, id };
 };
 
 export const signUpController = async (
@@ -85,16 +67,8 @@ export const signInController = async (
 export const tokenController = async (req: Request, res: Response) => {
   const { code } = req.query as { code: string };
 
-  try {
-    const result = await service.tokenService(req.body, code);
-    return ApiResponse.ok(res, result);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw ApiError.InternalServerError(error.message);
-    }
-
-    throw ApiError.noContent("Failed to generate token");
-  }
+  const result = await service.tokenService(req.body, code);
+  return ApiResponse.ok(res, result);
 };
 
 export const certController = async (req: Request, res: Response) => {

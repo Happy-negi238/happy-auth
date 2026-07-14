@@ -114,7 +114,7 @@ export const registerService = async (
     .where(eq(developers.id, developerId));
 
   if (isDeveloperActive.length === 0) {
-    return ApiError.badRequest("User is not authorized");
+    throw ApiError.badRequest("User is not authorized");
   }
 
   const isExist = await db
@@ -128,7 +128,7 @@ export const registerService = async (
     );
 
   if (isExist.length > 0) {
-    return ApiError.conflict("App already registered");
+    throw ApiError.conflict("App already registered");
   }
 
   const clientId = crypto.randomUUID();
@@ -147,7 +147,7 @@ export const registerService = async (
     .returning();
 
   if (insertedData.length === 0) {
-    return ApiError.InternalServerError("Failed to insert data");
+    throw ApiError.InternalServerError("Failed to insert data");
   }
 
   return {
@@ -163,7 +163,7 @@ export const signUpAuthService = async (clientId: string) => {
     .where(eq(registeredApps.clientId, clientId));
 
   if (!data) {
-    return ApiError.unauthorized("Unauthorized client");
+    throw ApiError.unauthorized("Unauthorized client");
   }
 
   const { appName, id } = data;
