@@ -7,11 +7,11 @@ import ApiResponse from "../../common/utils/api-response";
 export const clientSignUp = async (req: Request, res: Response) => {
   const result = await service.clientSignUpService(req.body);
 
-  res.cookie("developerId", result.id, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-  });
+  // res.cookie("developerId", result.id, {
+  //   httpOnly: true,
+  //   secure: process.env.NODE_ENV === "production",
+  //   sameSite: "strict",
+  // });
 
   return ApiResponse.ok(res, result);
 };
@@ -21,22 +21,25 @@ export const clientSignIn = async (req: Request, res: Response) => {
 
   res.cookie("accessToken", result.accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: true,
+    sameSite: "none" as const,
+    path: "/",
     maxAge: 10 * 60 * 1000, // 10 minutes
   });
 
   res.cookie("refreshToken", result.refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: true,
+    sameSite: "none" as const,
+    path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
   res.cookie("developerId", result.developerId, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: true,
+    sameSite: "none" as const,
+    path: "/",
   });
 
   return ApiResponse.ok(res, result.success, "User login Successfully");
