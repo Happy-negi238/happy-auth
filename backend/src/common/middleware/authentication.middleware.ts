@@ -29,11 +29,9 @@ export const authenticate = async (
   const accessToken = req.cookies.accessToken;
   const refreshToken = req.cookies.refreshToken;
 
-  console.log("in middleware");
   // 1. Try Access Token
   if (accessToken) {
     try {
-      console.log("access token found");
       const payload = verifyAccessToken(accessToken) as TokenPayload;
 
       req.user = {
@@ -50,7 +48,6 @@ export const authenticate = async (
   // 2. Try Refresh Token
   if (refreshToken) {
     try {
-      console.log("refresh token found");
       const payload = verifyRefreshToken(refreshToken) as TokenPayload;
 
       const [developerData] = await db

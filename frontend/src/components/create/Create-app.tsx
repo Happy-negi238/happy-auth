@@ -66,7 +66,6 @@ const CreateApp = () => {
     try {
       setLoading(true);
       const response = await registerApp(result.data);
-      console.log("create: ", response);
       setdata(response.data.data as ResponseType);
 
       setFormData({

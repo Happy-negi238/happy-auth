@@ -26,7 +26,6 @@ const OauthSignUpPage = () => {
 
     if (!result.success) {
       const fieldErrors = z.flattenError(result.error).fieldErrors;
-      console.log(result.error.message)
       setErrors({
         fullName: fieldErrors?.fullName?.[0] || "",
         email: fieldErrors?.email?.[0] || "",
