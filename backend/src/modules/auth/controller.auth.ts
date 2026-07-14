@@ -17,6 +17,9 @@ export const registerController = async (
   res: Response,
 ) => {
   const developerId: string | undefined = req.cookies.developerId;
+  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log("Cookie Header:", req.headers.cookie);
+  console.log("Parsed Cookies:", req.cookies);
 
   if (!developerId) {
     throw ApiError.notFound("Developer ID not found in cookies.");
