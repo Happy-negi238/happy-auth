@@ -28,7 +28,7 @@ export const registerController = async (
 };
 
 export const signUpAuthController = async (req: Request, res: Response) => {
-  const { client_id } = req.params as { client_id: string };
+  const { client_id } = req.query as { client_id: string };
 
   if (!client_id) {
     throw ApiError.unauthorized("Unauthorized request");
@@ -37,7 +37,7 @@ export const signUpAuthController = async (req: Request, res: Response) => {
   const result = await service.signUpAuthService(client_id);
 
   const { appName, id } = result;
-  return { appName, id };
+  return ApiResponse.ok(res, { appName, id }, "Sign up with OAUTH");
 };
 
 export const signUpController = async (

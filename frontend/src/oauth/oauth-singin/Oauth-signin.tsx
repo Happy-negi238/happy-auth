@@ -3,6 +3,7 @@ import AuthNavigation from "../component/AuthNavigation";
 import { oauthSignIn } from "@/api/axios/apps";
 import { OauthSignInZod, type OauthSignInTypes } from "./types";
 import { z } from "zod";
+import { useSearchParams } from "react-router-dom";
 
 const OauthSignInPage = () => {
   const [formData, setFormData] = useState<OauthSignInTypes>({
@@ -10,6 +11,12 @@ const OauthSignInPage = () => {
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [searchParams] = useSearchParams();
+
+  const clientId: string | null = searchParams.get("client_id");
+  if (!clientId) {
+    return;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -37,7 +44,9 @@ const OauthSignInPage = () => {
     });
 
     try {
-      const response = await oauthSignIn(result.data);
+      const response = await oauthSignIn(result.data, clientId);
+      setFormData({ email: "", password: "" });
+
       console.log(response.data);
     } catch (error) {
       console.error(error);

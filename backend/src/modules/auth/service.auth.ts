@@ -45,13 +45,14 @@ async function compareHashPassword(
 
 async function verifyClientId(clientId: string) {
   if (!clientId) {
-    ApiError.badRequest("Invalid provider");
+    throw ApiError.badRequest("Invalid provider");
   }
 
   const [app] = await db
     .select()
     .from(registeredApps)
     .where(eq(registeredApps.clientId, clientId));
+  
   if (!app) {
     throw ApiError.unauthorized("Unauthorized provider");
   }

@@ -57,22 +57,32 @@ export const unAuthenticate = async () => {
   return { data, status };
 };
 
-export const oauthSignUp = async (payload: OauthSignUp) => {
-  const response = await api.post("/o/auth", payload);
+export const oauthSignUp = async (payload: OauthSignUp, clientId: string) => {
+  const response = await api.post("/o/auth", payload, {
+    params:{
+      client_id: clientId,
+    }
+  });
   const { data } = response;
   return { data };
 };
 
 export const oauthSignUpClientId = async (clientId: string) => {
   const response = await api.get("/o/auth", {
-    params: clientId,
+    params: {
+      client_id: clientId,
+    },
   });
   const { data } = response;
   return { data };
 };
 
-export const oauthSignIn = async (payload: OauthSignIn) => {
-  const response = await api.post("/o/auth/sign-in", payload);
+export const oauthSignIn = async (payload: OauthSignIn, clientId: string) => {
+  const response = await api.post("/o/auth/sign-in", payload, {
+    params: {
+      client_id: clientId,
+    }
+  });
   const { data } = response;
   return { data };
 };
