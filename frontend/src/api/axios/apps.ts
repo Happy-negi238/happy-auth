@@ -68,7 +68,7 @@ export const oauthSignUp = async (payload: OauthSignUp, clientId: string) => {
 };
 
 export const oauthSignUpClientId = async (clientId: string) => {
-  const response = await api.get("/o/auth", {
+  const response = await api.get("/o/auth/verify", {
     params: {
       client_id: clientId,
     },

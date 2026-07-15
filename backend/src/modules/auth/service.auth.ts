@@ -52,7 +52,7 @@ async function verifyClientId(clientId: string) {
     .select()
     .from(registeredApps)
     .where(eq(registeredApps.clientId, clientId));
-  
+
   if (!app) {
     throw ApiError.unauthorized("Unauthorized provider");
   }
@@ -64,6 +64,8 @@ async function verifyClientId(clientId: string) {
   return {
     clientId: app.clientId,
     redirectUri: app.redirectUri,
+    appName: app.appName,
+    id: app.id,
   };
 }
 
@@ -158,17 +160,26 @@ export const registerService = async (
 };
 
 export const signUpAuthService = async (clientId: string) => {
-  const [data] = await db
-    .select()
-    .from(registeredApps)
-    .where(eq(registeredApps.clientId, clientId));
-
-  if (!data) {
-    throw ApiError.unauthorized("Unauthorized client");
+  try {
+    await verifyClientId(clientId);
+    return { success: true, message: "Client ID is valid" };
+  } catch (error) {
+    throw ApiError.unauthorized(
+      "Failed to verify client ID. Unauthorized request.",
+    );
   }
+};
 
-  const { appName, id } = data;
-  return { appName, id };
+export const verifyAuthService = async (clientId: string) => {
+  try {
+    const response = await verifyClientId(clientId);
+    const { appName, id } = response;
+    return { message: "Client ID is valid", data: { appName, id } };
+  } catch (error) {
+    throw ApiError.unauthorized(
+      "Failed to verify client ID. Unauthorized request.",
+    );
+  }
 };
 
 export const signUpService = async (data: SignUpBody, clientId: string) => {

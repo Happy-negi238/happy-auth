@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { registerApp } from "@/api/axios/apps";
-import ClientCredentialsModal from "../clientCredentialsModal/ClientCredentialsModal";
+import ClientCredentialsModal from "../client-credentials-modal/ClientCredentialsModal";
 import { RegisterTypeZod, type RegisterTypeZodTypes } from "./types";
 
 type ResponseType = {

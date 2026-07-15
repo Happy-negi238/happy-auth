@@ -11,6 +11,7 @@ const OauthSignInPage = () => {
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchParams] = useSearchParams();
 
   const clientId: string | null = searchParams.get("client_id");
@@ -43,6 +44,8 @@ const OauthSignInPage = () => {
       password: "",
     });
 
+    setIsSubmitting(true);
+
     try {
       const response = await oauthSignIn(result.data, clientId);
       setFormData({ email: "", password: "" });
@@ -50,6 +53,8 @@ const OauthSignInPage = () => {
       console.log(response.data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -118,7 +123,8 @@ const OauthSignInPage = () => {
 
           <button
             type="submit"
-            className="mt-3 w-full rounded-lg bg-white py-2 font-medium text-black transition hover:bg-neutral-200"
+            disabled={isSubmitting}
+            className="mt-3 w-full rounded-lg bg-white py-2 font-medium text-black transition hover:bg-neutral-200 disabled:cursor-not-allowed"
           >
             Sign-in
           </button>

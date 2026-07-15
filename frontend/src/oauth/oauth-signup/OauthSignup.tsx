@@ -13,6 +13,7 @@ const OauthSignUpPage = () => {
     phone: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchParams] = useSearchParams();
   const navigation = useNavigate();
 
@@ -51,6 +52,8 @@ const OauthSignUpPage = () => {
       password: "",
     });
 
+    setIsSubmitting(true);
+
     try {
       const response = await oauthSignUp(result.data, clientId);
       setFormData({ fullName: "", email: "", password: "", phone: "" });
@@ -61,6 +64,8 @@ const OauthSignUpPage = () => {
     } catch (error) {
       console.error(error);
       // Show API error to the user
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -179,7 +184,8 @@ const OauthSignUpPage = () => {
 
           <button
             type="submit"
-            className="mt-3 w-full rounded-lg bg-white py-2 font-medium text-black transition hover:bg-neutral-200"
+            disabled={isSubmitting}
+            className="mt-3 w-full rounded-lg bg-white py-2 font-medium text-black transition hover:bg-neutral-200 disabled:cursor-not-allowed"
           >
             Create Account
           </button>

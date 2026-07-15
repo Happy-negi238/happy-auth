@@ -34,10 +34,22 @@ export const signUpAuthController = async (req: Request, res: Response) => {
     throw ApiError.unauthorized("Unauthorized request");
   }
 
-  const result = await service.signUpAuthService(client_id);
+  await service.signUpAuthService(client_id);
 
-  const { appName, id } = result;
-  return ApiResponse.ok(res, { appName, id }, "Sign up with OAUTH");
+  res.redirect(`${process.env.FRONTEND_URL}${req.originalUrl}`);
+};
+
+export const verifyAuthController = async (req: Request, res: Response) => {
+  const { client_id } = req.query as { client_id: string };
+
+  if (!client_id) {
+    throw ApiError.unauthorized("Unauthorized request");
+  }
+
+  const result = await service.verifyAuthService(client_id);
+
+  const { appName, id } = result.data;
+  return ApiResponse.ok(res, { appName, id }, result.message);
 };
 
 export const signUpController = async (

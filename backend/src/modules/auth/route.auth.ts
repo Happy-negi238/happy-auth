@@ -29,6 +29,7 @@ router.post(
 
 // OATH Route
 router.get("/o/auth", controller.signUpAuthController);
+router.get("/o/auth/verify", controller.verifyAuthController);
 router.post("/o/auth", validate(SignUpDto), controller.signUpController);
 router.post("/o/auth/sign-in", validate(SignInDto), controller.signInController);
 router.post("/token",  controller.tokenController);

@@ -5,13 +5,13 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import Home from "../../components/home/Home";
-import CreateApp from "../../components/create/Create-app";
+import CreateApp from "../../components/create-app/CreateApp";
 import Layout from "../../Layout";
-import SignUp from "@/components/auth/sign-up/Sign-up";
-import SignIn from "@/components/auth/sign-in/Sign-in";
+import SignUp from "@/components/auth/sign-up/SignUp";
+import SignIn from "@/components/auth/sign-in/SignIn";
 import ProtectedRoute from "@/ProtectedRoute";
-import OauthSignUpPage from "@/oauth/oauth-signup/Oauth-signup";
-import OauthSignInPage from "@/oauth/oauth-singin/Oauth-signin";
+import OauthSignUpPage from "@/oauth/oauth-signup/OauthSignup";
+import OauthSignInPage from "@/oauth/oauth-singin/OauthSignin";
 import AuthLayout from "@/oauth/AuthLayout";
 import NotFound from "@/NotFound";
 import PublicRoute from "@/PublicRoute";
@@ -20,7 +20,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route index path="" element={<Home />} />
-      
+
       <Route element={<ProtectedRoute />}>
         <Route path="create-app" element={<CreateApp />} />
       </Route>
